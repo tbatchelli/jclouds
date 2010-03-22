@@ -7,3 +7,4 @@ target
 jclouds-aws-project.iml
 jclouds-aws-project.ipr
 jclouds-aws-project.iws
+core/src/test/resources/blobstore-credentials.properties
