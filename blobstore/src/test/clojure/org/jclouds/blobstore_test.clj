@@ -4,16 +4,25 @@
   (:import [org.jclouds.blobstore BlobStoreContextFactory]
            [java.io ByteArrayOutputStream]))
 
-(defn clean-stub-fixture
-  "This should allow basic tests to easily be run with another service."
-  [service account key & options]
-  (fn [f]
-    (with-blobstore [(apply blobstore service account key options)]
-      (doseq [container (containers)]
-        (delete-container (.getName container)))
-      (f))))
+(def properties (let [p (java.util.Properties.)]
+                  (with-open [properties-file (.getResourceAsStream
+                             (clojure.lang.RT/baseLoader)
+                             "blobstore-credentials.properties")]
+                    (.load p properties-file))
+                  (into {} p)))
 
-(use-fixtures :each (clean-stub-fixture "transient" "" ""))
+(defn clean-containers
+  "This should allow basic tests to easily be run with another service."
+  [f]
+  (with-blobstore [(apply blobstore (map properties
+                                         ["org.jclouds.blobstore.service"
+                                          "org.jclouds.blobstore.account"
+                                          "org.jclouds.blobstore.key"]))]
+    (doseq [container (containers)]
+      (delete-container (.getName container)))
+    (f)))
+
+(use-fixtures :each clean-containers)
 
 (deftest blobstore?-test
   (is (blobstore? *blobstore*)))
@@ -82,7 +91,7 @@
 ;; TODO: more tests involving blob-specific functions
 
 (deftest corruption-hunt
-  (let [container-name "test"
+  (let [container-name (properties "org.jclouds.blobstore.container-name")
         name "work-file"
         total-downloads 100
         threads 10]
