@@ -9,5 +9,5 @@
 (use-fixtures :each blobstore-fixture)
 
 (deftest aws-corruption-hunt
-  (when (= "s3" (properties "service"))
+  (when (= "s3" (properties "org.jclouds.blobstore.service"))
     (corruption-hunt)))
