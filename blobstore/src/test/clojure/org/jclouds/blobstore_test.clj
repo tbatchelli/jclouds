@@ -11,18 +11,16 @@
                     (.load p properties-file))
                   (into {} p)))
 
-(defn clean-containers
+(defn blobstore-fixture
   "This should allow basic tests to easily be run with another service."
   [f]
   (with-blobstore [(apply blobstore (map properties
                                          ["org.jclouds.blobstore.service"
                                           "org.jclouds.blobstore.account"
                                           "org.jclouds.blobstore.key"]))]
-    (doseq [container (containers)]
-      (delete-container (.getName container)))
     (f)))
 
-(use-fixtures :each clean-containers)
+(use-fixtures :each blobstore-fixture)
 
 (deftest blobstore?-test
   (is (blobstore? *blobstore*)))
@@ -33,6 +31,9 @@
   (is (blobstore? (as-blobstore (blobstore-context *blobstore*)))))
 
 (deftest create-existing-container-test
+  (doseq [container (containers)]
+    (delete-container (.getName container)))
+  (is (empty? (containers)))
   (is (not (container-exists? *blobstore* "")))
   (is (not (container-exists? "")))
   (is (create-container *blobstore* "fred"))
@@ -43,9 +44,10 @@
   (is (container-exists? *blobstore* "fred")))
 
 (deftest containers-test
-  (is (empty? (containers *blobstore*)))
-  (is (create-container *blobstore* "fred"))
-  (is (= 1 (count (containers *blobstore*)))))
+  (delete-container "fred")
+  (let [c (containers)]
+    (is (create-container *blobstore* "fred"))
+    (is (= (inc (count c)) (count (containers))))))
 
 (deftest list-container-test
   (is (create-container "container"))
