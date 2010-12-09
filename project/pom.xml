@@ -128,8 +128,8 @@
             <uniqueVersion>false</uniqueVersion>
         </repository>
         <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>${snapshotRepository.id}</id>
+            <url>${snapshotRepository.url}</url>
         </snapshotRepository>    
         <site>
             <id>website</id>
@@ -681,6 +681,16 @@ pageTracker._trackPageview();
                     <optional>true</optional>
                 </dependency>
             </dependencies>
+        </profile>
+        <profile>
+            <id>sonatype-repo-deploy</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <snapshotRepository.url>https://oss.sonatype.org/content/repositories/snapshots</snapshotRepository.url>
+                <snapshotRepository.id>sonatype-nexus-snapshots</snapshotRepository.id>
+            </properties>
         </profile>
     </profiles>
     <reporting>
